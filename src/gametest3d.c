@@ -18,35 +18,93 @@
  *    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  *    SOFTWARE.
  */
+#include "mgl_callback.h"
 #include "simple_logger.h"
 #include "graphics3d.h"
 #include "shader.h"
 #include "obj.h"
 #include "vector.h"
 #include "sprite.h"
+#include "entity.h"
+#include "space.h"
 
 void set_camera(Vec3D position, Vec3D rotation);
 
+void touch_callback(void *data, void *context)
+{
+    Entity *me,*other;
+    Body *obody;
+    if ((!data)||(!context))return;
+    me = (Entity *)data;
+    obody = (Body *)context;
+    if (entity_is_entity(obody->touch.data))
+    {
+        other = (Entity *)obody->touch.data;
+        slog("%s is ",other->name);
+    }
+    slog("touching me.... touching youuuuuuuu");
+}
+
+void think(Entity *self)
+{
+    if (!self)return;
+    switch(self->state)
+    {
+        case 0:
+            self->frame = 0;
+            break;
+        case 1:
+            self->frame += 0.3;
+            if (self->frame >= 24)self->frame = 0;
+            break;
+        case 2:
+            self->frame -= 0.3;
+            if (self->frame < 0)self->frame = 23;
+            break;
+    }
+    self->objModel = self->objAnimation[(int)self->frame];
+}
+
+
+Entity *newCube(Vec3D position,const char *name)
+{
+    Entity * ent;
+    char buffer[255];
+    int i;
+    ent = entity_new();
+    if (!ent)
+    {
+        return NULL;
+    }
+    for (i = 0; i < 24;i++)
+    {
+        sprintf(buffer,"models/robot/walk_bot_%06i.obj",i + 1);
+        ent->objAnimation[i] = obj_load(buffer);
+    }
+    ent->objModel = ent->objAnimation[0];
+    ent->texture = LoadSprite("models/robot/robot.png",1024,1024);
+    vec3d_cpy(ent->body.position,position);
+    cube_set(ent->body.bounds,-1,-1,-1,2,2,2);
+    ent->rotation.x = 90;
+    sprintf(ent->name,"%s",name);
+    ent->think = think;
+    ent->state = 0;
+    mgl_callback_set(&ent->body.touch,touch_callback,ent);
+    return ent;
+}
+
 int main(int argc, char *argv[])
 {
-    GLuint vao;
+    int i;
     float r = 0;
-    GLuint triangleBufferObject;
+    Space *space;
+    Entity *cube1,*cube2;
     char bGameLoopRunning = 1;
     Vec3D cameraPosition = {0,-10,0.3};
     Vec3D cameraRotation = {90,0,0};
     SDL_Event e;
-    Obj *obj,*bgobj;
-    Sprite *texture,*bgtext;
-    const float triangleVertices[] = {
-        0.0f, 0.5f, 0.0f, 1.0f,
-        0.5f, -0.366f, 0.0f, 1.0f,
-        -0.5f, -0.366f, 0.0f, 1.0f,
-        //next part contains vertex colors
-        1.0f, 0.0f, 0.0f, 1.0f,
-        0.0f, 1.0f, 0.0f, 1.0f,
-        0.0f, 0.0f, 1.0f, 1.0f  
-    }; //we love you vertices!
+    Obj *bgobj,*chicken;
+    Sprite *bgtext;
     
     init_logger("gametest3d.log");
     if (graphics3d_init(1024,768,1,"gametest3d",33) != 0)
@@ -55,26 +113,29 @@ int main(int argc, char *argv[])
     }
     model_init();
     obj_init();
+    entity_init(255);
     
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao); //make our vertex array object, we need it to restore state we set after binding it. Re-binding reloads the state associated with it.
-    
-    glGenBuffers(1, &triangleBufferObject); //create the buffer
-    glBindBuffer(GL_ARRAY_BUFFER, triangleBufferObject); //we're "using" this one now
-    glBufferData(GL_ARRAY_BUFFER, sizeof(triangleVertices), triangleVertices, GL_STATIC_DRAW); //formatting the data for the buffer
-    glBindBuffer(GL_ARRAY_BUFFER, 0); //unbind any buffers
-    
-    obj = obj_load("models/cube.obj");
-    texture = LoadSprite("models/cube_text.png",1024,1024);
-
+    chicken = obj_load("models/monkey.obj");
     bgobj = obj_load("models/mountainvillage.obj");
     bgtext = LoadSprite("models/mountain_text.png",1024,1024);
     
-//    obj = obj_load("models/mountainvillage.obj");
+    cube1 = newCube(vec3d(0,0,0),"Cubert");
+    cube2 = newCube(vec3d(10,0,0),"Hobbes");
     
+    cube2->body.velocity.x = -0.1;
     
+    space = space_new();
+    space_set_steps(space,100);
+    
+    space_add_body(space,&cube1->body);
+    space_add_body(space,&cube2->body);
     while (bGameLoopRunning)
     {
+        entity_think_all();
+        for (i = 0; i < 100;i++)
+        {
+            space_do_step(space);
+        }
         while ( SDL_PollEvent(&e) ) 
         {
             if (e.type == SDL_QUIT)
@@ -155,6 +216,11 @@ int main(int argc, char *argv[])
                 {
                     cameraRotation.x -= 1;
                 }
+                else if (e.key.keysym.sym == SDLK_n)
+                {
+                    cube1->state ++;
+                    if (cube1->state >= 3)cube1->state = 0;
+                }
             }
         }
 
@@ -165,7 +231,46 @@ int main(int argc, char *argv[])
             cameraPosition,
             cameraRotation);
         
-  
+        entity_draw_all();
+        glPushMatrix();
+        glTranslatef(-5,0,0);
+        obj_draw(
+            chicken,
+            vec3d(0,0,0),
+            vec3d(0,0,0),
+            vec3d(1,1,1),
+            vec4d(1,0,0,1),
+            NULL
+        );
+        glPushMatrix();
+        
+        glTranslatef(0,1,0);
+        glScalef(0.5,0.5,0.5);
+        
+        glRotatef(45,0.0,0.0,1.00);
+        obj_draw(
+            chicken,
+            vec3d(0,0,0),
+            vec3d(0,0,0),
+            vec3d(1,1,1),
+            vec4d(0,1,0,1),
+            NULL
+        );        
+        glPushMatrix();
+        glRotatef(45,0.0,1.0,0.0);
+        obj_draw(
+            chicken,
+            vec3d(0,0,0),
+            vec3d(0,0,0),
+            vec3d(0.5,0.5,0.5),
+            vec4d(0,0,1,1),
+            NULL
+        );        
+        
+        glPopMatrix();
+        glPopMatrix();
+        
+        glPopMatrix();
         obj_draw(
             bgobj,
             vec3d(0,0,2),
@@ -175,14 +280,6 @@ int main(int argc, char *argv[])
             bgtext
         );
         
-        obj_draw(
-            obj,
-            vec3d(0,0,0),
-            vec3d(90,r++,0),
-            vec3d(0.5,0.5,0.5),
-            vec4d(1,1,1,1),
-            texture
-        );
         if (r > 360)r -= 360;
         glPopMatrix();
         /* drawing code above here! */
