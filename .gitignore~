@@ -3,9 +3,6 @@
 *.ko
 *.elf
 
-#Backup Files
-~*
-
 # Precompiled Headers
 *.gch
 *.pch
