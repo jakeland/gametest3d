@@ -56,6 +56,8 @@ int graphics3d_init(int sw,int sh,int fullscreen,const char *project,Uint32 fram
     
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS,1);
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES,2);
     
     //MUST make a context AND make it current BEFORE glewInit()!
     glewExperimental = GL_TRUE;
@@ -83,7 +85,7 @@ int graphics3d_init(int sw,int sh,int fullscreen,const char *project,Uint32 fram
     glMatrixMode( GL_MODELVIEW );
     glLoadIdentity();
 
-    glClearColor(0.0,0.0,0.0,0.0);
+    glClearColor(1.0,0.0,0.0,0.0);
     glClear( 1 );
     
     glEnable(GL_DEPTH_TEST);
@@ -124,7 +126,7 @@ void graphics3d_next_frame()
     {
         SDL_Delay(__graphics3d_frame_delay - (now - then));        
     }
-    slog("ticks passed this frame: %i",(now - then));
+    //slog("ticks passed this frame: %i",(now - then));
     then = now;
 }
 

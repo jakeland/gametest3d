@@ -40,9 +40,9 @@ void touch_callback(void *data, void *context)
     if (entity_is_entity(obody->touch.data))
     {
         other = (Entity *)obody->touch.data;
-        slog("%s is ",other->name);
+        //slog("%s is ",other->name);
     }
-    slog("touching me.... touching youuuuuuuu");
+   // slog("touching me.... touching youuuuuuuu");
 }
 
 void think(Entity *self)
@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
     bgobj = obj_load("models/mountainvillage.obj");
     bgtext = LoadSprite("models/mountain_text.png",1024,1024);
     
-    cube1 = newCube(vec3d(0,0,0),"Cubert");
+    cube1 = newCube(vec3d(cameraPosition.x,0,0),"Cubert");
     cube2 = newCube(vec3d(10,0,0),"Hobbes");
     
     cube2->body.velocity.x = -0.1;
@@ -151,10 +151,12 @@ int main(int argc, char *argv[])
                 else if (e.key.keysym.sym == SDLK_SPACE)
                 {
                     cameraPosition.z++;
+		    //playerPosition to match cameraPosition
                 }
                 else if (e.key.keysym.sym == SDLK_z)
                 {
                     cameraPosition.z--;
+		    //playerPosition to match cameraPosition
                 }
                 else if (e.key.keysym.sym == SDLK_w)
                 {
@@ -164,8 +166,10 @@ int main(int argc, char *argv[])
                         vec3d(
                             -sin(cameraRotation.z * DEGTORAD),
                             cos(cameraRotation.z * DEGTORAD),
-                            0
+                            -cos(cameraRotation.x * DEGTORAD)
                         ));
+		    slog("%f is the z I want to have moved: ", cos(cameraRotation.x *DEGTORAD));
+		    //playerPosition to match cameraPosition
                 }
                 else if (e.key.keysym.sym == SDLK_s)
                 {
@@ -175,8 +179,9 @@ int main(int argc, char *argv[])
                         vec3d(
                             sin(cameraRotation.z * DEGTORAD),
                             -cos(cameraRotation.z * DEGTORAD),
-                            0
+                            cos(cameraRotation.x * DEGTORAD)
                         ));
+		    //playerPosition to match cameraPosition
                 }
                 else if (e.key.keysym.sym == SDLK_d)
                 {
@@ -188,6 +193,7 @@ int main(int argc, char *argv[])
                             sin(cameraRotation.z * DEGTORAD),
                             0
                         ));
+		    //playerPosition to match cameraPosition
                 }
                 else if (e.key.keysym.sym == SDLK_a)
                 {
@@ -199,22 +205,27 @@ int main(int argc, char *argv[])
                             -sin(cameraRotation.z * DEGTORAD),
                             0
                         ));
+		    //playerPosition to match cameraPosition
                 }
                 else if (e.key.keysym.sym == SDLK_LEFT)
                 {
                     cameraRotation.z += 1;
+		    //playerRotation to match cameraRotation
                 }
                 else if (e.key.keysym.sym == SDLK_RIGHT)
                 {
                     cameraRotation.z -= 1;
+		    //playerRotation to match cameraRotation
                 }
                 else if (e.key.keysym.sym == SDLK_UP)
                 {
                     cameraRotation.x += 1;
+		    //playerRotation to match cameraRotation
                 }
                 else if (e.key.keysym.sym == SDLK_DOWN)
                 {
                     cameraRotation.x -= 1;
+		    //playerRotation to match cameraRotation
                 }
                 else if (e.key.keysym.sym == SDLK_n)
                 {
@@ -296,6 +307,8 @@ void set_camera(Vec3D position, Vec3D rotation)
     glTranslatef(-position.x,
                  -position.y,
                  -position.z);
+    
+    //add spaceShip coordinates here? =JMC
 }
 
 /*eol@eof*/
