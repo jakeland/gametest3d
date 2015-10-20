@@ -129,7 +129,7 @@ int main(int argc, char *argv[])
     Space *space;
     Entity *cube1,*cube2, *player;
     char bGameLoopRunning = 1;
-    Vec3D cameraPosition = {0,-10,0.3};
+    Vec3D cameraPosition = {0,-10,0};
     Vec3D cameraRotation = {90,0,0};
     SDL_Event e;
     Obj *bgobj,*chicken;
@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
     
     cube1 = newCube(vec3d(cameraPosition.x,0,0),"Cubert");
     cube2 = newCube(vec3d(10,0,0),"Hobbes");
-    player = newSpaceShip(vec3d(cameraPosition.x, cameraPosition.y + 10, cameraPosition.y),(cameraRotation), "Player");
+    player = newSpaceShip(vec3d(cameraPosition.x, cameraPosition.y + 10, cameraPosition.z),(cameraRotation), "Player");
     
     cube2->body.velocity.x = -0.1;
     
@@ -200,7 +200,7 @@ int main(int argc, char *argv[])
                             cos(cameraRotation.z * DEGTORAD),
                             -cos(cameraRotation.x * DEGTORAD)
                         ));
-		    slog("%f is the z I want to have moved: ", cos(cameraRotation.x *DEGTORAD));
+		    
 		    vec3d_add(
 		      player->body.position,
 		      player->body.position,
@@ -220,7 +220,14 @@ int main(int argc, char *argv[])
                             -cos(cameraRotation.z * DEGTORAD),
                             cos(cameraRotation.x * DEGTORAD)
                         ));
-		    //playerPosition to match cameraPosition
+		    vec3d_add(
+		      player->body.position,
+		      player->body.position,
+		      vec3d(
+			 sin(cameraRotation.z * DEGTORAD),
+			 -cos(cameraRotation.z * DEGTORAD),
+			 cos(cameraRotation.x * DEGTORAD)
+		      ));
                 }
                 else if (e.key.keysym.sym == SDLK_d)
                 {
@@ -232,6 +239,7 @@ int main(int argc, char *argv[])
                             sin(cameraRotation.z * DEGTORAD),
                             0
                         ));
+		    
 		    //playerPosition to match cameraPosition
                 }
                 else if (e.key.keysym.sym == SDLK_a)
@@ -245,15 +253,24 @@ int main(int argc, char *argv[])
                             0
                         ));
 		    //playerPosition to match cameraPosition
+		    
                 }
                 else if (e.key.keysym.sym == SDLK_LEFT)
                 {
                     cameraRotation.z += 1;
+		    
 		    //playerRotation to match cameraRotation
                 }
                 else if (e.key.keysym.sym == SDLK_RIGHT)
                 {
+		  
                     cameraRotation.z -= 1;
+		    
+		      
+			slog("The Cos of Camera Rotation: %i ", cos(cameraRotation.z *DEGTORAD));
+			slog("The Radians Camera Rotation: %i ", (cameraRotation.z *DEGTORAD));
+			slog("The Degrees of Camera Rotation: %i ", (cameraRotation.z));
+		      
 		    //playerRotation to match cameraRotation
                 }
                 else if (e.key.keysym.sym == SDLK_UP)
