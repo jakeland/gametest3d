@@ -65,6 +65,13 @@ void think(Entity *self)
     self->objModel = self->objAnimation[(int)self->frame];
 }
 
+void playerThink(Entity *self)
+{
+  if(!self)return;
+  
+ 
+}
+
 
 Entity *newCube(Vec3D position,const char *name)
 {
@@ -95,25 +102,20 @@ Entity *newCube(Vec3D position,const char *name)
 
 Entity *newSpaceShip(Vec3D position,Vec3D rotation, const char *name){
   Entity *ent;
-  char buffer[255];
-  int i;
+  
+  
   ent = entity_new();
   if (!ent)
   {
     return NULL;
   }
-  for (i = 0; i < 24;i++)
-    {
-        sprintf(buffer,"models/robot/walk_bot_%06i.obj",i + 1);
-        ent->objAnimation[i] = obj_load(buffer);
-    }
-    ent->objModel = ent->objAnimation[0];
-    ent->texture = LoadSprite("models/robot/robot.png",1024,1024);
+    ent->objModel = obj_load("models/monkey.obj");
+    ent->texture = LoadSprite("models/monkey.png",1024,1024);
     vec3d_cpy(ent->body.position,position);
     cube_set(ent->body.bounds,-1,-1,-1,2,2,2);
   vec3d_cpy(ent->rotation, rotation);
   sprintf(ent->name, "%s", name);
-  ent->think = think;
+  ent->think = playerThink;
   ent->state = 0;
   mgl_callback_set(&ent->body.touch, touch_callback,ent);
   return ent;
