@@ -93,12 +93,39 @@ Entity *newCube(Vec3D position,const char *name)
     return ent;
 }
 
+Entity *newSpaceShip(Vec3D position,Vec3D rotation, const char *name){
+  Entity *ent;
+  char buffer[255];
+  int i;
+  ent = entity_new();
+  if (!ent)
+  {
+    return NULL;
+  }
+  for (i = 0; i < 24;i++)
+    {
+        sprintf(buffer,"models/robot/walk_bot_%06i.obj",i + 1);
+        ent->objAnimation[i] = obj_load(buffer);
+    }
+    ent->objModel = ent->objAnimation[0];
+    ent->texture = LoadSprite("models/robot/robot.png",1024,1024);
+    vec3d_cpy(ent->body.position,position);
+    cube_set(ent->body.bounds,-1,-1,-1,2,2,2);
+  vec3d_cpy(ent->rotation, rotation);
+  sprintf(ent->name, "%s", name);
+  ent->think = think;
+  ent->state = 0;
+  mgl_callback_set(&ent->body.touch, touch_callback,ent);
+  return ent;
+}
+  
+
 int main(int argc, char *argv[])
 {
     int i;
     float r = 0;
     Space *space;
-    Entity *cube1,*cube2;
+    Entity *cube1,*cube2, *player;
     char bGameLoopRunning = 1;
     Vec3D cameraPosition = {0,-10,0.3};
     Vec3D cameraRotation = {90,0,0};
@@ -119,8 +146,10 @@ int main(int argc, char *argv[])
     bgobj = obj_load("models/mountainvillage.obj");
     bgtext = LoadSprite("models/mountain_text.png",1024,1024);
     
+    
     cube1 = newCube(vec3d(cameraPosition.x,0,0),"Cubert");
     cube2 = newCube(vec3d(10,0,0),"Hobbes");
+    player = newSpaceShip(vec3d(cameraPosition.x, cameraPosition.y + 10, cameraPosition.y),(cameraRotation), "Player");
     
     cube2->body.velocity.x = -0.1;
     
@@ -129,6 +158,7 @@ int main(int argc, char *argv[])
     
     space_add_body(space,&cube1->body);
     space_add_body(space,&cube2->body);
+    space_add_body(space,&player->body);
     while (bGameLoopRunning)
     {
         entity_think_all();
@@ -169,7 +199,14 @@ int main(int argc, char *argv[])
                             -cos(cameraRotation.x * DEGTORAD)
                         ));
 		    slog("%f is the z I want to have moved: ", cos(cameraRotation.x *DEGTORAD));
-		    //playerPosition to match cameraPosition
+		    vec3d_add(
+		      player->body.position,
+		      player->body.position,
+		      vec3d(
+                            -sin(cameraRotation.z * DEGTORAD),
+                            cos(cameraRotation.z * DEGTORAD),
+                            -cos(cameraRotation.x * DEGTORAD)
+                        ));
                 }
                 else if (e.key.keysym.sym == SDLK_s)
                 {
@@ -308,7 +345,7 @@ void set_camera(Vec3D position, Vec3D rotation)
                  -position.y,
                  -position.z);
     
-    //add spaceShip coordinates here? =JMC
+   
 }
 
 /*eol@eof*/
