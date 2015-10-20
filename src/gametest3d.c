@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
     
     cube1 = newCube(vec3d(cameraPosition.x,0,0),"Cubert");
     cube2 = newCube(vec3d(10,0,0),"Hobbes");
-    player = newSpaceShip(vec3d(cameraPosition.x, cameraPosition.y + 10, cameraPosition.z),(cameraRotation), "Player");
+    player = newSpaceShip(vec3d(cameraPosition.x, cameraPosition.y + 10, cameraPosition.z),(cameraRotation.x), "Player");
     
     cube2->body.velocity.x = -0.1;
     
@@ -269,7 +269,7 @@ int main(int argc, char *argv[])
 		      
 			slog("The Cos of Camera Rotation: %i ", cos(cameraRotation.z *DEGTORAD));
 			slog("The Radians Camera Rotation: %i ", (cameraRotation.z *DEGTORAD));
-			slog("The Degrees of Camera Rotation: %i ", (cameraRotation.z));
+			slog("The Degrees of Camera Rotation: %i ", (cameraRotation.z * RADTODEG));
 		      
 		    //playerRotation to match cameraRotation
                 }
