@@ -243,7 +243,14 @@ int main(int argc, char *argv[])
                 }
                 else if (e.key.keysym.sym == SDLK_s)
                 {
-                       
+                     vec3d_add(
+		       cameraPosition,
+		       cameraPosition,
+		       vec3d(
+			 sin(cameraRotation.z * DEGTORAD),
+			     -cos(cameraRotation.z * DEGTORAD),
+			     cos(cameraRotation.x * DEGTORAD)
+		       ));
 		    vec3d_add(
 		      camTarget,
 		      camTarget,
@@ -252,14 +259,7 @@ int main(int argc, char *argv[])
                             -cos(cameraRotation.z * DEGTORAD),
                             cos(cameraRotation.x * DEGTORAD)
                         ));
-		    vec3d_add(
-		      player->body.position,
-		      player->body.position,
-		      vec3d(
-			 sin(cameraRotation.z * DEGTORAD),
-			 -cos(cameraRotation.z * DEGTORAD),
-			 cos(cameraRotation.x * DEGTORAD)
-		      ));
+		    
 		    vec3d_cpy(
 		      player->body.position,
 		      camTarget);
@@ -292,9 +292,13 @@ int main(int argc, char *argv[])
                 }
                 else if (e.key.keysym.sym == SDLK_LEFT)
                 {
-		    cameraRotation.z -= 1;
-		   
-		    
+		    vec3d_cpy(cameraPosition, player->body.position);
+                    cameraRotation.z += 1;
+		    vec3d_add(cameraPosition,
+			      cameraPosition,
+			      vec3d((-sin((cameraRotation.z + 180) * DEGTORAD) * 10),
+				    (cos((cameraRotation.z + 180)* DEGTORAD) * 10),
+				    cameraPosition.z));
 		    //playerRotation to match cameraRotation
                 }
                 else if (e.key.keysym.sym == SDLK_RIGHT)
@@ -304,7 +308,7 @@ int main(int argc, char *argv[])
                     cameraRotation.z -= 1;
 		    vec3d_add(cameraPosition,
 			      cameraPosition,
-			      vec3d(-(sin((cameraRotation.z + 180) * DEGTORAD) * 10),
+			      vec3d((-sin((cameraRotation.z + 180) * DEGTORAD) * 10),
 				    (cos((cameraRotation.z + 180)* DEGTORAD) * 10),
 				    cameraPosition.z));
 			
@@ -313,12 +317,26 @@ int main(int argc, char *argv[])
                 }
                 else if (e.key.keysym.sym == SDLK_UP)
                 {
+		  vec3d_cpy(cameraPosition, player->body.position);
                     cameraRotation.x += 1;
+		    vec3d_add(cameraPosition,
+			      cameraPosition,
+			      vec3d(cameraPosition.x,
+				     (-sin((cameraRotation.x) * DEGTORAD)* 10),
+				     (cos((cameraRotation.x) * DEGTORAD)* 10)
+			      ));
 		    //playerRotation to match cameraRotation
                 }
                 else if (e.key.keysym.sym == SDLK_DOWN)
                 {
+                    vec3d_cpy(cameraPosition, player->body.position);
                     cameraRotation.x -= 1;
+		    vec3d_add(cameraPosition,
+			      cameraPosition,
+			      vec3d(cameraPosition.x,
+				     (-sin((cameraRotation.x) * DEGTORAD)* 10),
+				     (cos((cameraRotation.x) * DEGTORAD)* 10)
+			      ));
 		    //playerRotation to match cameraRotation
                 }
                 else if (e.key.keysym.sym == SDLK_n)
