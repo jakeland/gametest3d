@@ -85,7 +85,7 @@ int graphics3d_init(int sw,int sh,int fullscreen,const char *project,Uint32 fram
     glMatrixMode( GL_MODELVIEW );
     glLoadIdentity();
 
-    glClearColor(1.0,0.0,0.0,0.0);
+    glClearColor(0.0,0.0,0.0,0.0);
     glClear( 1 );
     
     glEnable(GL_DEPTH_TEST);

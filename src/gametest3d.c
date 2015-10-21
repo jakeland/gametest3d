@@ -72,6 +72,15 @@ void playerThink(Entity *self)
  
 }
 
+Vec3D normalize(Vec3D tempPosition, Vec3D tempTarget)
+{
+  Vec3D temp = {0,0,0};
+  vec3d_add(temp, tempPosition, tempTarget);
+  float length = sqrt((temp.x*temp.x) + (temp.y*temp.y) + (temp.z*temp.z));
+  Vec3D normVec = {temp.x/length, temp.y/length, temp.z/length};
+  return (normVec);
+}
+
 
 Entity *newCube(Vec3D position,const char *name)
 {
@@ -129,6 +138,8 @@ int main(int argc, char *argv[])
     Space *space;
     Entity *cube1,*cube2, *player;
     char bGameLoopRunning = 1;
+    Vec3D camDir = {0.0,0.0,0.0};
+    Vec3D camTarget = {0,0,0};
     Vec3D cameraPosition = {0,-10,0};
     Vec3D cameraRotation = {90,0,0};
     SDL_Event e;
@@ -151,8 +162,9 @@ int main(int argc, char *argv[])
     
     cube1 = newCube(vec3d(cameraPosition.x,0,0),"Cubert");
     cube2 = newCube(vec3d(10,0,0),"Hobbes");
-    player = newSpaceShip(vec3d(cameraPosition.x, cameraPosition.y + 10, cameraPosition.z),(cameraRotation.x), "Player");
-    
+    player = newSpaceShip(camTarget,(cameraRotation), "Player");
+    camDir = normalize(cameraPosition,
+       camTarget);
     cube2->body.velocity.x = -0.1;
     
     space = space_new();
@@ -163,6 +175,7 @@ int main(int argc, char *argv[])
     space_add_body(space,&player->body);
     while (bGameLoopRunning)
     {
+        
         entity_think_all();
         for (i = 0; i < 100;i++)
         {
@@ -200,22 +213,26 @@ int main(int argc, char *argv[])
                             cos(cameraRotation.z * DEGTORAD),
                             -cos(cameraRotation.x * DEGTORAD)
                         ));
-		    
+		     
 		    vec3d_add(
-		      player->body.position,
-		      player->body.position,
+		      camTarget,
+		      camTarget,
 		      vec3d(
                             -sin(cameraRotation.z * DEGTORAD),
                             cos(cameraRotation.z * DEGTORAD),
                             -cos(cameraRotation.x * DEGTORAD)
                         ));
+		    vec3d_cpy(
+		      player->body.position,
+		      camTarget);
                 }
                 else if (e.key.keysym.sym == SDLK_s)
                 {
-                    vec3d_add(
-                        cameraPosition,
-                        cameraPosition,
-                        vec3d(
+                       
+		    vec3d_add(
+		      camTarget,
+		      camTarget,
+		      vec3d(
                             sin(cameraRotation.z * DEGTORAD),
                             -cos(cameraRotation.z * DEGTORAD),
                             cos(cameraRotation.x * DEGTORAD)
@@ -228,6 +245,9 @@ int main(int argc, char *argv[])
 			 -cos(cameraRotation.z * DEGTORAD),
 			 cos(cameraRotation.x * DEGTORAD)
 		      ));
+		    vec3d_cpy(
+		      player->body.position,
+		      camTarget);
                 }
                 else if (e.key.keysym.sym == SDLK_d)
                 {
@@ -263,13 +283,11 @@ int main(int argc, char *argv[])
                 }
                 else if (e.key.keysym.sym == SDLK_RIGHT)
                 {
-		  
+		    Vec3D temp = {player->body.position.x - cameraPosition.x,player->body.position.y - cameraPosition.y,player->body.position.z - cameraPosition.z};
+		    
                     cameraRotation.z -= 1;
 		    
-		      
-			slog("The Cos of Camera Rotation: %i ", cos(cameraRotation.z *DEGTORAD));
-			slog("The Radians Camera Rotation: %i ", (cameraRotation.z *DEGTORAD));
-			slog("The Degrees of Camera Rotation: %i ", (cameraRotation.z * RADTODEG));
+			
 		      
 		    //playerRotation to match cameraRotation
                 }
