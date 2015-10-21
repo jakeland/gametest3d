@@ -72,15 +72,27 @@ void playerThink(Entity *self)
  
 }
 
-Vec3D normalize(Vec3D tempPosition, Vec3D tempTarget)
-{
-  Vec3D temp = {0,0,0};
-  vec3d_add(temp, tempPosition, tempTarget);
-  float length = sqrt((temp.x*temp.x) + (temp.y*temp.y) + (temp.z*temp.z));
-  Vec3D normVec = {temp.x/length, temp.y/length, temp.z/length};
-  return (normVec);
+Vec3D normalizeVector(Vec3D temp){
+   float length = sqrt((temp.x*temp.x) + (temp.y*temp.y) + (temp.z*temp.z));
+   Vec3D normVec = {temp.x/length, temp.y/length, temp.z/length};
+   return(normVec);
 }
 
+Vec3D getTarget(Vec3D tempPosition, Vec3D tempTarget)
+{
+  Vec3D temp = {0,0,0};
+  vec3d_add(temp, tempPosition, vec3d(-tempTarget.x, -tempTarget.y, -tempTarget.z));
+  
+  normalizeVector(temp);
+  return (temp);
+}
+
+Vec3D getCrossProduct(Vec3D temp1, Vec3D temp2){
+  Vec3D  crossProduct = {temp1.y * temp2.z - temp1.z * temp2.y,
+			  temp1.z*temp2.x - temp1.x*temp2.z, 
+			  temp1.x* temp2.z - temp1.y*temp2.x};
+ return(crossProduct);
+}
 
 Entity *newCube(Vec3D position,const char *name)
 {
@@ -140,8 +152,13 @@ int main(int argc, char *argv[])
     char bGameLoopRunning = 1;
     Vec3D camDir = {0.0,0.0,0.0};
     Vec3D camTarget = {0,0,0};
+    Vec3D up = {0,0,0};
     Vec3D cameraPosition = {0,-10,0};
     Vec3D cameraRotation = {90,0,0};
+    float VerticalRot = 0.0;
+    float HorizontalRot = 0.0;
+    float camx = 0.0;
+    float camy = 0.0;
     SDL_Event e;
     Obj *bgobj,*chicken;
     Sprite *bgtext;
@@ -163,8 +180,10 @@ int main(int argc, char *argv[])
     cube1 = newCube(vec3d(cameraPosition.x,0,0),"Cubert");
     cube2 = newCube(vec3d(10,0,0),"Hobbes");
     player = newSpaceShip(camTarget,(cameraRotation), "Player");
-    camDir = normalize(cameraPosition,
+    camDir = getTarget(cameraPosition,
        camTarget);
+    Vec3D cameraRight = normalizeVector(getCrossProduct(up,camDir));
+    Vec3D cameraUp = getCrossProduct(camDir, cameraRight);
     cube2->body.velocity.x = -0.1;
     
     space = space_new();
@@ -183,6 +202,11 @@ int main(int argc, char *argv[])
         }
         while ( SDL_PollEvent(&e) ) 
         {
+	  camTarget = player->body.position;
+	  camDir = getTarget(cameraPosition,
+		  camTarget);
+		  cameraRight = normalizeVector(getCrossProduct(up,camDir));
+		   cameraUp = getCrossProduct(camDir, cameraRight);
             if (e.type == SDL_QUIT)
             {
                 bGameLoopRunning = 0;
@@ -277,16 +301,21 @@ int main(int argc, char *argv[])
                 }
                 else if (e.key.keysym.sym == SDLK_LEFT)
                 {
-                    cameraRotation.z += 1;
+		    cameraRotation.z -= 1;
+		   
 		    
 		    //playerRotation to match cameraRotation
                 }
                 else if (e.key.keysym.sym == SDLK_RIGHT)
                 {
 		    Vec3D temp = {player->body.position.x - cameraPosition.x,player->body.position.y - cameraPosition.y,player->body.position.z - cameraPosition.z};
-		    
+		    vec3d_cpy(cameraPosition, player->body.position);
                     cameraRotation.z -= 1;
-		    
+		    vec3d_add(cameraPosition,
+			      cameraPosition,
+			      vec3d(-(sin((cameraRotation.z + 180) * DEGTORAD) * 10),
+				    (cos((cameraRotation.z + 180)* DEGTORAD) * 10),
+				    cameraPosition.z));
 			
 		      
 		    //playerRotation to match cameraRotation
@@ -315,6 +344,7 @@ int main(int argc, char *argv[])
         set_camera(
             cameraPosition,
             cameraRotation);
+	
         
         entity_draw_all();
         glPushMatrix();
