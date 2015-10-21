@@ -308,7 +308,7 @@ int main(int argc, char *argv[])
                     cameraRotation.z -= 1;
 		    vec3d_add(cameraPosition,
 			      cameraPosition,
-			      vec3d((-sin((cameraRotation.z + 180) * DEGTORAD) * 10),
+			      vec3d(-(sin((cameraRotation.z + 180) * DEGTORAD) * 10),
 				    (cos((cameraRotation.z + 180)* DEGTORAD) * 10),
 				    cameraPosition.z));
 			
@@ -330,7 +330,7 @@ int main(int argc, char *argv[])
                 else if (e.key.keysym.sym == SDLK_DOWN)
                 {
                     vec3d_cpy(cameraPosition, player->body.position);
-                    cameraRotation.x -= 1;
+                    cameraRotation.x += 1;
 		    vec3d_add(cameraPosition,
 			      cameraPosition,
 			      vec3d(cameraPosition.x,
