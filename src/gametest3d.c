@@ -296,9 +296,16 @@ int main(int argc, char *argv[])
                     cameraRotation.z += 1;
 		    vec3d_add(cameraPosition,
 			      cameraPosition,
-			      vec3d((-sin((cameraRotation.z + 180) * DEGTORAD) * 10),
+			      vec3d(
+				((sin((cameraRotation.z) *DEGTORAD) * sin((cameraRotation.x) * DEGTORAD)) * 10),
+				(-(cos((cameraRotation.z) *DEGTORAD) * sin((cameraRotation.x) * DEGTORAD)) * 10),
+				(cos(cameraRotation.x * DEGTORAD) * 10)
+			     ));
+		    /*not what I need, rotates around the z axis at 0 only*
+		     vec3d((-sin((cameraRotation.z + 180) * DEGTORAD) * 10),
 				    (cos((cameraRotation.z + 180)* DEGTORAD) * 10),
-				    cameraPosition.z));
+				    cameraPosition.z)
+				    */
 		    //playerRotation to match cameraRotation
                 }
                 else if (e.key.keysym.sym == SDLK_RIGHT)
@@ -308,10 +315,11 @@ int main(int argc, char *argv[])
                     cameraRotation.z -= 1;
 		    vec3d_add(cameraPosition,
 			      cameraPosition,
-			      vec3d(-(sin((cameraRotation.z + 180) * DEGTORAD) * 10),
-				    (cos((cameraRotation.z + 180)* DEGTORAD) * 10),
-				    cameraPosition.z));
-			
+			      vec3d(
+				((sin((cameraRotation.z) *DEGTORAD) * sin((cameraRotation.x) * DEGTORAD)) * 10),
+				(-(cos((cameraRotation.z) *DEGTORAD) * sin((cameraRotation.x) * DEGTORAD)) * 10),
+				(cos(cameraRotation.x * DEGTORAD) * 10)
+			     ));
 		      
 		    //playerRotation to match cameraRotation
                 }
@@ -321,22 +329,24 @@ int main(int argc, char *argv[])
                     cameraRotation.x += 1;
 		    vec3d_add(cameraPosition,
 			      cameraPosition,
-			      vec3d(cameraPosition.x,
-				     (-sin((cameraRotation.x) * DEGTORAD)* 10),
-				     (cos((cameraRotation.x) * DEGTORAD)* 10)
+			      vec3d(
+				((sin((cameraRotation.z) *DEGTORAD) * sin((cameraRotation.x) * DEGTORAD)) * 10),
+				(-(cos((cameraRotation.z) *DEGTORAD) * sin((cameraRotation.x) * DEGTORAD)) * 10),
+				(cos(cameraRotation.x * DEGTORAD) * 10)
 			      ));
 		    //playerRotation to match cameraRotation
                 }
                 else if (e.key.keysym.sym == SDLK_DOWN)
                 {
                     vec3d_cpy(cameraPosition, player->body.position);
-                    cameraRotation.x += 1;
+                    cameraRotation.x -= 1;
 		    vec3d_add(cameraPosition,
 			      cameraPosition,
-			      vec3d(cameraPosition.x,
-				     (-sin((cameraRotation.x) * DEGTORAD)* 10),
-				     (cos((cameraRotation.x) * DEGTORAD)* 10)
-			      ));
+			       vec3d(
+				((sin((cameraRotation.z) *DEGTORAD) * sin((cameraRotation.x) * DEGTORAD)) * 10),
+				(-(cos((cameraRotation.z) *DEGTORAD) * sin((cameraRotation.x) * DEGTORAD)) * 10),
+				(cos(cameraRotation.x * DEGTORAD) * 10)
+			     ));
 		    //playerRotation to match cameraRotation
                 }
                 else if (e.key.keysym.sym == SDLK_n)
