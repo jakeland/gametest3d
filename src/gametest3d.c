@@ -196,6 +196,7 @@ int main(int argc, char *argv[])
         }
         while ( SDL_PollEvent(&e) ) 
         {
+
 	  camTarget = player->body.position;
 	 
             if (e.type == SDL_QUIT)
@@ -266,6 +267,7 @@ int main(int argc, char *argv[])
                 }
                 else if (e.key.keysym.sym == SDLK_d)
                 {
+		   
                     vec3d_add(
                         cameraPosition,
                         cameraPosition,
@@ -274,6 +276,18 @@ int main(int argc, char *argv[])
                             sin(cameraRotation.z * DEGTORAD),
                             0
                         ));
+		    vec3d_add(
+		      camTarget,
+		      camTarget,
+		      vec3d(
+                            cos(cameraRotation.z * DEGTORAD),
+                            sin(cameraRotation.z * DEGTORAD),
+                            0
+                        ));
+		    
+		    vec3d_cpy(
+		      player->body.position,
+		      camTarget);
 		    
 		    //playerPosition to match cameraPosition
                 }
@@ -287,6 +301,18 @@ int main(int argc, char *argv[])
                             -sin(cameraRotation.z * DEGTORAD),
                             0
                         ));
+		    vec3d_add(
+		      camTarget,
+		      camTarget,
+		      vec3d(
+                            -cos(cameraRotation.z * DEGTORAD),
+                            -sin(cameraRotation.z * DEGTORAD),
+                            0
+                        ));
+		    
+		    vec3d_cpy(
+		      player->body.position,
+		      camTarget);
 		    //playerPosition to match cameraPosition
 		    
                 }
