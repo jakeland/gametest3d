@@ -95,27 +95,64 @@ void playerThink(Entity *self)
   const Uint8 *keyState = SDL_GetKeyboardState(NULL);
   if(!self)return;
   
+  switch(self->state){
+    case 0:
+    //idle
+    break;
+    
+    case 1:
+     //moving
+    
+    break;
+    
+    
+    
+  }
+  
   if(keyState[SDL_SCANCODE_LEFT]){
 	  slog( "left is pressed");
+  
+	  
   }
 	  
   if(keyState[SDL_SCANCODE_RIGHT]){
 	    slog("right is pressed");
+  
+    
   }
   
   if(keyState[SDL_SCANCODE_UP]){
 	    slog("up is pressed");
+	    
+  
+    
   }
   
   if(keyState[SDL_SCANCODE_A]){
 	    slog("A is pressed");
+	    self->state = 1;
+  
+    
   }
   if(keyState[SDL_SCANCODE_D]){
 	    slog("D is pressed");
+	    self->state = 1;  
+    
   }
   if(keyState[SDL_SCANCODE_W]){
 	    slog("W is pressed");
+	    self->state = 1;
   }
+  if(keyState[SDL_SCANCODE_S]){
+	  slog("S is pressed");
+	  self->state = 1;
+  }
+  
+  if(self->state == 1)
+    if (!keyState[SDL_SCANCODE_W] && !keyState[SDL_SCANCODE_A] && !keyState[SDL_SCANCODE_D] && !keyState[SDL_SCANCODE_S]){
+     self->state = 0; 
+     slog("set state to 0... please?");
+    }
 	  
   /*
   switch(self->state)
