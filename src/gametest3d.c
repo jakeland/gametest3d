@@ -47,6 +47,7 @@ void touch_callback(void *data, void *context)
 
 void think(Entity *self)
 {
+  
     if (!self)return;
     switch(self->state)
     {
@@ -91,7 +92,31 @@ void laserThink(Entity * self){
 
 void playerThink(Entity *self)
 {
+  const Uint8 *keyState = SDL_GetKeyboardState(NULL);
   if(!self)return;
+  
+  if(keyState[SDL_SCANCODE_LEFT]){
+	  slog( "left is pressed");
+  }
+	  
+  if(keyState[SDL_SCANCODE_RIGHT]){
+	    slog("right is pressed");
+  }
+  
+  if(keyState[SDL_SCANCODE_UP]){
+	    slog("up is pressed");
+  }
+  
+  if(keyState[SDL_SCANCODE_A]){
+	    slog("A is pressed");
+  }
+  if(keyState[SDL_SCANCODE_D]){
+	    slog("D is pressed");
+  }
+  if(keyState[SDL_SCANCODE_W]){
+	    slog("W is pressed");
+  }
+	  
   /*
   switch(self->state)
   {
@@ -200,11 +225,9 @@ int main(int argc, char *argv[])
     
     Vec3D cameraPosition = {0,-10,0};
     Vec3D cameraRotation = {90,0,0};
-    Vec3D tempCameraPosition = cameraPosition;
-    Vec3D tempCameraRotation = cameraRotation;
     
-    Vec3D tempCamTarget = camTarget;
-    Vec3D tempPlayerPosition = tempPlayerPosition;
+    
+    
     SDL_Event e;
     Obj *bgobj,*chicken;
     Sprite *bgtext;
@@ -239,6 +262,8 @@ int main(int argc, char *argv[])
     {
         
         entity_think_all();
+	
+	    
         for (i = 0; i < 100;i++)
         {
             space_do_step(space);
@@ -434,7 +459,7 @@ int main(int argc, char *argv[])
                 }
             }
         }
-
+	
         graphics3d_frame_begin();
         
         glPushMatrix();
