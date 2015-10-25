@@ -22,6 +22,7 @@ typedef struct Entity_S
     float frame;
     Sprite *texture;    /**<object texture*/
     Body body;
+    float cameraDistance;
     void (*think)(struct Entity_S *self);
 }Entity;
 

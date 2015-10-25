@@ -65,6 +65,30 @@ void think(Entity *self)
     self->objModel = self->objAnimation[(int)self->frame];
 }
 
+void enemyThink(Entity *self)
+{
+  if(!self)return;
+  
+  
+  
+}
+
+void asteroidThink(Entity * self){
+  if(!self)return;
+  
+  
+}
+
+void missleThink(Entity * self){
+  if(!self)return;
+  
+}
+
+void laserThink(Entity * self){
+  if(!self)return;
+  
+}
+
 void playerThink(Entity *self)
 {
   if(!self)return;
@@ -157,6 +181,7 @@ Entity *newSpaceShip(Vec3D position,Vec3D rotation, const char *name){
   vec3d_cpy(ent->rotation, rotation);
   sprintf(ent->name, "%s", name);
   ent->think = playerThink;
+  ent->cameraDistance = 10.0;
   ent->state = 0;
   mgl_callback_set(&ent->body.touch, touch_callback,ent);
   return ent;
@@ -175,7 +200,11 @@ int main(int argc, char *argv[])
     
     Vec3D cameraPosition = {0,-10,0};
     Vec3D cameraRotation = {90,0,0};
+    Vec3D tempCameraPosition = cameraPosition;
+    Vec3D tempCameraRotation = cameraRotation;
     
+    Vec3D tempCamTarget = camTarget;
+    Vec3D tempPlayerPosition = tempPlayerPosition;
     SDL_Event e;
     Obj *bgobj,*chicken;
     Sprite *bgtext;
@@ -230,17 +259,17 @@ int main(int argc, char *argv[])
                 {
                     bGameLoopRunning = 0;
                 }
-                else if (e.key.keysym.sym == SDLK_SPACE)
+                if (e.key.keysym.sym == SDLK_SPACE)
                 {
                     cameraPosition.z++;
 		    //playerPosition to match cameraPosition
                 }
-                else if (e.key.keysym.sym == SDLK_z)
+                if (e.key.keysym.sym == SDLK_z)
                 {
                     cameraPosition.z--;
 		    //playerPosition to match cameraPosition
                 }
-                else if (e.key.keysym.sym == SDLK_w)
+                if (e.key.keysym.sym == SDLK_w)
                 {
                     vec3d_add(
                         cameraPosition,
@@ -263,7 +292,7 @@ int main(int argc, char *argv[])
 		      player->body.position,
 		      camTarget);
                 }
-                else if (e.key.keysym.sym == SDLK_s)
+                if (e.key.keysym.sym == SDLK_s)
                 {
                      vec3d_add(
 		       cameraPosition,
@@ -286,7 +315,7 @@ int main(int argc, char *argv[])
 		      player->body.position,
 		      camTarget);
                 }
-                else if (e.key.keysym.sym == SDLK_d)
+                if (e.key.keysym.sym == SDLK_d)
                 {
 		   
                     vec3d_add(
@@ -312,7 +341,7 @@ int main(int argc, char *argv[])
 		    
 		    //playerPosition to match cameraPosition
                 }
-                else if (e.key.keysym.sym == SDLK_a)
+                if (e.key.keysym.sym == SDLK_a)
                 {
                     vec3d_add(
                         cameraPosition,
@@ -337,17 +366,19 @@ int main(int argc, char *argv[])
 		    //playerPosition to match cameraPosition
 		    
                 }
-                else if (e.key.keysym.sym == SDLK_LEFT)
+                if (e.key.keysym.sym == SDLK_LEFT)
                 {
 		    vec3d_cpy(cameraPosition, player->body.position);
                     cameraRotation.z += 1;
 		    vec3d_add(cameraPosition,
 			      cameraPosition,
 			      vec3d(
-				((sin((cameraRotation.z) *DEGTORAD) * sin((cameraRotation.x) * DEGTORAD)) * 10),
-				(-(cos((cameraRotation.z) *DEGTORAD) * sin((cameraRotation.x) * DEGTORAD)) * 10),
-				(cos(cameraRotation.x * DEGTORAD) * 10)
+				((sin((cameraRotation.z) *DEGTORAD) * sin((cameraRotation.x) * DEGTORAD)) * player->cameraDistance),
+				(-(cos((cameraRotation.z) *DEGTORAD) * sin((cameraRotation.x) * DEGTORAD)) * player->cameraDistance),
+				(cos(cameraRotation.x * DEGTORAD) *  player->cameraDistance)
 			     ));
+		    
+		    
 		    /*not what I need, rotates around the z axis at 0 only*
 		     vec3d((-sin((cameraRotation.z + 180) * DEGTORAD) * 10),
 				    (cos((cameraRotation.z + 180)* DEGTORAD) * 10),
@@ -355,7 +386,7 @@ int main(int argc, char *argv[])
 				    */
 		    //playerRotation to match cameraRotation
                 }
-                else if (e.key.keysym.sym == SDLK_RIGHT)
+                if (e.key.keysym.sym == SDLK_RIGHT)
                 {
 		    
 		    vec3d_cpy(cameraPosition, player->body.position);
@@ -363,40 +394,40 @@ int main(int argc, char *argv[])
 		    vec3d_add(cameraPosition,
 			      cameraPosition,
 			      vec3d(
-				((sin((cameraRotation.z) *DEGTORAD) * sin((cameraRotation.x) * DEGTORAD)) * 10),
-				(-(cos((cameraRotation.z) *DEGTORAD) * sin((cameraRotation.x) * DEGTORAD)) * 10),
-				(cos(cameraRotation.x * DEGTORAD) * 10)
+				((sin((cameraRotation.z) *DEGTORAD) * sin((cameraRotation.x) * DEGTORAD)) *  player->cameraDistance),
+				(-(cos((cameraRotation.z) *DEGTORAD) * sin((cameraRotation.x) * DEGTORAD)) *  player->cameraDistance),
+				(cos(cameraRotation.x * DEGTORAD) *  player->cameraDistance)
 			     ));
 		      
 		    //playerRotation to match cameraRotation
                 }
-                else if (e.key.keysym.sym == SDLK_UP)
+                if (e.key.keysym.sym == SDLK_UP)
                 {
 		  vec3d_cpy(cameraPosition, player->body.position);
                     cameraRotation.x += 1;
 		    vec3d_add(cameraPosition,
 			      cameraPosition,
 			      vec3d(
-				((sin((cameraRotation.z) *DEGTORAD) * sin((cameraRotation.x) * DEGTORAD)) * 10),
-				(-(cos((cameraRotation.z) *DEGTORAD) * sin((cameraRotation.x) * DEGTORAD)) * 10),
-				(cos(cameraRotation.x * DEGTORAD) * 10)
+				((sin((cameraRotation.z) *DEGTORAD) * sin((cameraRotation.x) * DEGTORAD)) *  player->cameraDistance),
+				(-(cos((cameraRotation.z) *DEGTORAD) * sin((cameraRotation.x) * DEGTORAD)) *  player->cameraDistance),
+				(cos(cameraRotation.x * DEGTORAD) * player->cameraDistance)
 			      ));
 		    //playerRotation to match cameraRotation
                 }
-                else if (e.key.keysym.sym == SDLK_DOWN)
+                if (e.key.keysym.sym == SDLK_DOWN)
                 {
                     vec3d_cpy(cameraPosition, player->body.position);
                     cameraRotation.x -= 1;
 		    vec3d_add(cameraPosition,
 			      cameraPosition,
 			       vec3d(
-				((sin((cameraRotation.z) *DEGTORAD) * sin((cameraRotation.x) * DEGTORAD)) * 10),
-				(-(cos((cameraRotation.z) *DEGTORAD) * sin((cameraRotation.x) * DEGTORAD)) * 10),
-				(cos(cameraRotation.x * DEGTORAD) * 10)
+				((sin((cameraRotation.z) *DEGTORAD) * sin((cameraRotation.x) * DEGTORAD)) * player->cameraDistance),
+				(-(cos((cameraRotation.z) *DEGTORAD) * sin((cameraRotation.x) * DEGTORAD)) *  player->cameraDistance),
+				(cos(cameraRotation.x * DEGTORAD) *  player->cameraDistance)
 			     ));
 		    //playerRotation to match cameraRotation
                 }
-                else if (e.key.keysym.sym == SDLK_n)
+                if (e.key.keysym.sym == SDLK_n)
                 {
                     cube1->state ++;
                     if (cube1->state >= 3)cube1->state = 0;
