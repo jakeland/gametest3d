@@ -68,8 +68,10 @@ void think(Entity *self)
 void playerThink(Entity *self)
 {
   if(!self)return;
+  /*
   switch(self->state)
   {
+   
     case 0: 
       //spawning?
       break;
@@ -80,8 +82,14 @@ void playerThink(Entity *self)
     case 2: 
       //dead?
       break;
-  
- 
+      
+    case 3:
+      //idle?
+      break;
+    case 4:
+      //need to figure out player movemonet
+    break;
+ */
 }
 
 Vec3D normalizeVector(Vec3D temp){
@@ -210,6 +218,7 @@ int main(int argc, char *argv[])
         {
 
 	  camTarget = player->body.position;
+	  
 	 
             if (e.type == SDL_QUIT)
             {
