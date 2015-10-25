@@ -68,6 +68,18 @@ void think(Entity *self)
 void playerThink(Entity *self)
 {
   if(!self)return;
+  switch(self->state)
+  {
+    case 0: 
+      //spawning?
+      break;
+    case 1:
+      // dying?
+      break;
+      
+    case 2: 
+      //dead?
+      break;
   
  
 }
