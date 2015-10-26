@@ -23,6 +23,8 @@ typedef struct Entity_S
     Sprite *texture;    /**<object texture*/
     Body body;
     float cameraDistance;
+    float rotationMod;
+    float speedMod;
     void (*think)(struct Entity_S *self);
 }Entity;
 

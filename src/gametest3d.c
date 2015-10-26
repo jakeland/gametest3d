@@ -243,6 +243,8 @@ Entity *newSpaceShip(Vec3D position,Vec3D rotation, const char *name){
   vec3d_cpy(ent->rotation, rotation);
   sprintf(ent->name, "%s", name);
   ent->think = playerThink;
+  ent->rotationMod = 1.0;
+  ent->speedMod = 1.0;
   ent->cameraDistance = 10.0;
   ent->state = 0;
   mgl_callback_set(&ent->body.touch, touch_callback,ent);
