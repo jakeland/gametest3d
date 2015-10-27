@@ -18,9 +18,14 @@ typedef struct Entity_S
     Vec3D rotation;
     Vec3D scale;
     Vec4D color;
+    int weapon;
+    int maxWeapons;
     float fireDelay;
+    float currFireDelay;
     float damageDelay;
+    float currDamageDelay;
     float specialDelay;
+    float currSpecialDelay;
     Obj *objModel;
     Obj *objAnimation[24];
     int state;

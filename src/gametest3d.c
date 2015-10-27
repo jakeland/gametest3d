@@ -66,7 +66,34 @@ void think(Entity *self)
 }
 
 void asteroidThink(Entity *self){
- if(!self) return; 
+ if(!self) return;
+  
+ if((self->acceleration.x != self->body.velocity.x)
+   || (self->acceleration.y != self->body.velocity.y)
+   || (self->acceleration.z != self->body.velocity.z)
+){
+  if(self->acceleration.x <  self->body.velocity.x){
+    self->body.velocity.x -= 1;
+  }
+  else
+    self->body.velocity.x += 1;
+  if(self->acceleration.y <  self->body.velocity.y){
+    self->body.velocity.y -= 1;
+  }
+  else
+    self->body.velocity.y += 1;
+  if(self->acceleration.z <  self->body.velocity.z){
+    self->body.velocity.z -= 1;
+  }
+  else
+    self->body.velocity.z += 1;
+  
+  
+ }
+ 
+ vec3d_add(self->body.position,
+	   self->body.position,
+	   self->body.velocity);
 }
 
 void enemyThink(Entity *self){
@@ -179,6 +206,14 @@ Entity *newSpaceShip(Vec3D position,Vec3D rotation, const char *name){
     return NULL;
   }
   ent->health = 100.00;
+  ent->currFireDelay = 0.0;
+  ent->fireDelay = 1.0;
+  ent->currDamageDelay = 0.0;
+  ent->damageDelay = 4.0;
+  ent->currSpecialDelay = 0.0;
+  ent->specialDelay = 6.0;
+  ent->weapon = 0;
+  ent->maxWeapons = 2;
     ent->objModel = obj_load("models/monkey.obj");
     ent->texture = LoadSprite("models/monkey.png",1024,1024);
     vec3d_cpy(ent->body.position,position);
@@ -191,7 +226,7 @@ Entity *newSpaceShip(Vec3D position,Vec3D rotation, const char *name){
   return ent;
 }
 
-Entity *newAsteroid(Vec3D position, Vec3D rotation){
+Entity *newAsteroid(Vec3D position, Vec3D rotation, Vec3D acceleration){
  Entity *ent;
  
  ent = entity_new();
@@ -200,15 +235,18 @@ Entity *newAsteroid(Vec3D position, Vec3D rotation){
    return NULL;
  }
     ent->health = 20.00;
+    vec3d_cpy(ent->acceleration, acceleration);
     ent->objModel = obj_load("models/cube.obj");
     ent->texture = LoadSprite("models/cube_text.png",1024, 1024);
     vec3d_cpy(ent->body.position, position);
     vec3d_cpy(ent->rotation, rotation);
     cube_set(ent->body.bounds,-1,-1,-1,2,2,2);
+    ent->currDamageDelay = 0.0;
+    ent->damageDelay = 0.0;
     ent->rotation=vec3d(0,0,0);
-    ent->acceleration=vec3d(0,0,0);
     ent->think = asteroidThink;
     ent->state = 0;
+    vec3d_cpy(ent->body.velocity, acceleration);
     return ent;
 }
   
@@ -218,7 +256,7 @@ int main(int argc, char *argv[])
     int i;
     float r = 0;
     Space *space;
-    Entity *cube1,*cube2, *player;
+    Entity *cube1,*cube2, *player, *asteroid, *movingAsteroid;
     char bGameLoopRunning = 1;
     
     Vec3D camTarget = {0,0,0};
@@ -293,9 +331,11 @@ int main(int argc, char *argv[])
 		else if (testing == 1){
 		 if (e.key.keysym.sym == SDLK_r){
 		  //spawn asteroid; 
+		   asteroid = newAsteroid(vec3d(camTarget.x, camTarget.y + 20, camTarget.z), vec3d(0,0,0), vec3d(0,0,0));
 		 }
 		 if (e.key.keysym.sym == SDLK_f){
 		  //spawn moving asteroid; 
+		   movingAsteroid = newAsteroid(vec3d(camTarget.x, camTarget.y + 20, camTarget.z), vec3d(0,20,0), vec3d(0,2,0));
 		 }
 		 if (e.key.keysym.sym == SDLK_v){
 		  //spawn enemy;
