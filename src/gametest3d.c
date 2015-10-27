@@ -65,15 +65,15 @@ void think(Entity *self)
     self->objModel = self->objAnimation[(int)self->frame];
 }
 
-void AsteroidThink(Entity *self){
+void asteroidThink(Entity *self){
  if(!self) return; 
 }
 
-void EnemyThink(Entity *self){
+void enemyThink(Entity *self){
  if(!self) return; 
 }
 
-void LaserThink(Entity *self){
+void laserThink(Entity *self){
   if(!self) return;
 }
 
@@ -186,6 +186,24 @@ Entity *newSpaceShip(Vec3D position,Vec3D rotation, const char *name){
   ent->state = 0;
   mgl_callback_set(&ent->body.touch, touch_callback,ent);
   return ent;
+}
+
+Entity *newAsteroid(Vec3D position, Vec3D rotation){
+ Entity *ent;
+ 
+ ent = entity_new();
+ if (!ent)
+ {
+   return NULL;
+ }
+    ent->objModel = obj_load("models/cube.obj");
+    ent->texture = LoadSprite("models/cube_text.png",1024, 1024);
+    cube_set(ent->body.bounds,-1,-1,-1,2,2,2);
+    ent->rotation=vec3d(0,0,0);
+    ent->acceleration=vec3d(0,0,0);
+    ent->think = asteroidThink;
+    ent->state = 0;
+    
 }
   
 
