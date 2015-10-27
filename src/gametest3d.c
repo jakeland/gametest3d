@@ -65,9 +65,35 @@ void think(Entity *self)
     self->objModel = self->objAnimation[(int)self->frame];
 }
 
+void AsteroidThink(Entity *self){
+ if(!self) return; 
+}
+
+void EnemyThink(Entity *self){
+ if(!self) return; 
+}
+
+void LaserThink(Entity *self){
+  if(!self) return;
+}
+
 void playerThink(Entity *self)
 {
   if(!self)return;
+  
+  //press Space
+  //Spawn Lazers
+  //
+  //Press C
+  //Cycle Current Weapon
+  //
+  //Press X
+  //Cycle Current Weapon
+  //
+  //Press Z
+  //DO A BARREL ROLL!!!!!
+  
+  
   /*
   switch(self->state)
   {
@@ -175,7 +201,7 @@ int main(int argc, char *argv[])
     
     Vec3D cameraPosition = {0,-10,0};
     Vec3D cameraRotation = {90,0,0};
-    
+    float  directionModifier = 1.0;
     SDL_Event e;
     Obj *bgobj,*chicken;
     Sprite *bgtext;
@@ -200,6 +226,10 @@ int main(int argc, char *argv[])
     
     cube2->body.velocity.x = -0.1;
     
+   
+    
+    
+    
     space = space_new();
     space_set_steps(space,100);
     
@@ -208,7 +238,7 @@ int main(int argc, char *argv[])
     space_add_body(space,&player->body);
     while (bGameLoopRunning)
     {
-        
+       
         entity_think_all();
         for (i = 0; i < 100;i++)
         {
