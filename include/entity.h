@@ -12,6 +12,8 @@ typedef struct Entity_S
     int inuse;
     int uid;    /**<unique id of this entity*/
     char name[128];
+    float health;
+    float shield;
     Vec3D acceleration;
     Vec3D rotation;
     Vec3D scale;

@@ -40,9 +40,9 @@ void touch_callback(void *data, void *context)
     if (entity_is_entity(obody->touch.data))
     {
         other = (Entity *)obody->touch.data;
-        //slog("%s is ",other->name);
+        slog("%s is ",other->name);
     }
-   // slog("touching me.... touching youuuuuuuu");
+   slog("touching me.... touching youuuuuuuu");
 }
 
 void think(Entity *self)
@@ -133,6 +133,8 @@ Vec3D getTargetVector(Vec3D tempPosition, Vec3D tempTarget)
   return (temp);
 }
 
+
+
 Vec3D getCrossProduct(Vec3D temp1, Vec3D temp2){
   Vec3D  crossProduct = {temp1.y * temp2.z - temp1.z * temp2.y,
 			  temp1.z*temp2.x - temp1.x*temp2.z, 
@@ -176,6 +178,7 @@ Entity *newSpaceShip(Vec3D position,Vec3D rotation, const char *name){
   {
     return NULL;
   }
+  ent->health = 100.00;
     ent->objModel = obj_load("models/monkey.obj");
     ent->texture = LoadSprite("models/monkey.png",1024,1024);
     vec3d_cpy(ent->body.position,position);
@@ -196,14 +199,17 @@ Entity *newAsteroid(Vec3D position, Vec3D rotation){
  {
    return NULL;
  }
+    ent->health = 20.00;
     ent->objModel = obj_load("models/cube.obj");
     ent->texture = LoadSprite("models/cube_text.png",1024, 1024);
+    vec3d_cpy(ent->body.position, position);
+    vec3d_cpy(ent->rotation, rotation);
     cube_set(ent->body.bounds,-1,-1,-1,2,2,2);
     ent->rotation=vec3d(0,0,0);
     ent->acceleration=vec3d(0,0,0);
     ent->think = asteroidThink;
     ent->state = 0;
-    
+    return ent;
 }
   
 
@@ -216,7 +222,7 @@ int main(int argc, char *argv[])
     char bGameLoopRunning = 1;
     
     Vec3D camTarget = {0,0,0};
-    
+    int testing = 0;
     Vec3D cameraPosition = {0,-10,0};
     Vec3D cameraRotation = {90,0,0};
     float  directionModifier = 1.0;
@@ -278,6 +284,24 @@ int main(int argc, char *argv[])
                 {
                     bGameLoopRunning = 0;
                 }
+                else if (e.key.keysym.sym == SDLK_t){
+		  if (testing == 0)
+		    testing = 1;
+		  else 
+		    testing = 0;
+		}
+		else if (testing == 1){
+		 if (e.key.keysym.sym == SDLK_r){
+		  //spawn asteroid; 
+		 }
+		 if (e.key.keysym.sym == SDLK_f){
+		  //spawn moving asteroid; 
+		 }
+		 if (e.key.keysym.sym == SDLK_v){
+		  //spawn enemy;
+		   
+		 }
+		}
                 else if (e.key.keysym.sym == SDLK_SPACE)
                 {
                     cameraPosition.z++;
