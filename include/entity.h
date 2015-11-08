@@ -19,6 +19,7 @@ typedef struct Entity_S
     Vec3D scale;
     Vec4D color;
     int weapon;
+    int type;
     int maxWeapons;
     float fireDelay;
     float currFireDelay;

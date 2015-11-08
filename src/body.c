@@ -16,6 +16,7 @@ void body_process(Body *body)
       
         vec3d_add(body->position,body->position,body->_stepOffVector);
     }
+    
 }
 
 /*eol@eof*/

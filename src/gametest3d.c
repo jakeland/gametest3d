@@ -32,7 +32,54 @@ void set_camera(Vec3D position, Vec3D rotation);
 
 void touch_callback(void *data, void *context)
 {
+    float temp;
     Entity *me,*other;
+    Body *obody;
+    if ((!data)||(!context))return;
+    me = (Entity *)data;
+    obody = (Body *)context;
+    
+    if (entity_is_entity(obody->touch.data))
+    {
+      other = (Entity *)obody->touch.data;
+     
+     if(me->state!= 1 && other->state!=1)
+     {
+        
+	 slog("other type %i", other->type);
+	  slog("me type %i", me->type);
+	if(other->type == me->type)
+	{
+	  slog("they is the same");
+	  return;
+	}
+	
+	else{
+	  if(other->health >= 0){
+	  temp = other->health ;
+	  slog("%s is ",other->name);
+	  
+	  other->health -= me->health;
+	  }
+	  if(me->health >= 0)
+	  me->health -= temp;
+	
+	  
+	
+	  slog("here's what I think the %s health value is: %f", other->name,other->health);
+	}
+	    if(other->health <= 0)
+	  other->state = 1;
+	  if(me->health <= 0)
+	  me->state = 1;
+     }
+    }
+
+}
+
+void hit_callback(void *data, void *context)
+{
+     Entity *me,*other;
     Body *obody;
     if ((!data)||(!context))return;
     me = (Entity *)data;
@@ -41,8 +88,9 @@ void touch_callback(void *data, void *context)
     {
         other = (Entity *)obody->touch.data;
         slog("%s is ",other->name);
+	other->health-= me->health;
     }
-   slog("touching me.... touching youuuuuuuu");
+   slog("losing health");
 }
 
 void think(Entity *self)
@@ -67,6 +115,9 @@ void think(Entity *self)
 
 void asteroidThink(Entity *self){
  if(!self) return;
+  if (self->state == 1){
+    entity_free(self);
+ }
   
  if((self->acceleration.x != self->body.velocity.x)
    || (self->acceleration.y != self->body.velocity.y)
@@ -98,15 +149,50 @@ void asteroidThink(Entity *self){
 
 void enemyThink(Entity *self){
  if(!self) return; 
+ if (self->state == 1){
+    entity_free(self);
+ }
+ 
 }
 
 void laserThink(Entity *self){
-  if(!self) return;
+   if(!self) return;
+    if (self->state == 1){
+    entity_free(self);
+ }
+  
+ if((self->acceleration.x != self->body.velocity.x)
+   || (self->acceleration.y != self->body.velocity.y)
+   || (self->acceleration.z != self->body.velocity.z)
+){
+  if(self->acceleration.x <  self->body.velocity.x){
+    self->body.velocity.x -= 1;
+  }
+  else
+    self->body.velocity.x += 1;
+  if(self->acceleration.y <  self->body.velocity.y){
+    self->body.velocity.y -= 1;
+  }
+  else
+    self->body.velocity.y += 1;
+  if(self->acceleration.z <  self->body.velocity.z){
+    self->body.velocity.z -= 1;
+  }
+  else
+    self->body.velocity.z += 1;
+  
+  
+ }
+ 
+ vec3d_add(self->body.position,
+	   self->body.position,
+	   self->body.velocity);
 }
 
 void playerThink(Entity *self)
 {
   if(!self)return;
+  
   
   //press Space
   //Spawn Lazers
@@ -192,9 +278,11 @@ Entity *newCube(Vec3D position,const char *name)
     sprintf(ent->name,"%s",name);
     ent->think = think;
     ent->state = 0;
-    mgl_callback_set(&ent->body.touch,touch_callback,ent);
+
     return ent;
 }
+
+
 
 Entity *newSpaceShip(Vec3D position,Vec3D rotation, const char *name){
   Entity *ent;
@@ -205,6 +293,7 @@ Entity *newSpaceShip(Vec3D position,Vec3D rotation, const char *name){
   {
     return NULL;
   }
+  ent->type = 0;
   ent->health = 100.00;
   ent->currFireDelay = 0.0;
   ent->fireDelay = 1.0;
@@ -226,6 +315,55 @@ Entity *newSpaceShip(Vec3D position,Vec3D rotation, const char *name){
   return ent;
 }
 
+Entity *newEnemy(Vec3D position, Vec3D rotation){
+Entity *ent;
+ent = entity_new();
+  sprintf(ent->name,"%s","laser");
+if(!ent)
+{
+  return NULL;
+}
+ent->type = 1;
+ent->health = 40;
+ent->objModel = obj_load("models/monkey.obj");
+ent->texture = LoadSprite("models/cube_text.png", 1024, 1024);
+vec3d_cpy(ent->body.position, position);
+vec3d_cpy(ent->rotation, rotation);
+cube_set(ent->body.bounds,-1,-1,-1,2,2,2);
+ent->currDamageDelay = 0.0;
+ent->damageDelay = 0.5;
+ent->rotation = vec3d(0,0,0);
+ent->think = enemyThink;
+ent->state = 0;
+mgl_callback_set(&ent->body.touch, touch_callback,ent);
+
+return ent;
+}
+
+Entity*newLaser(Vec3D position, Vec3D rotation, Vec3D acceleration, int type){
+  Entity *ent;
+  ent = entity_new();
+  if(!ent)
+  {
+   return NULL; 
+  }
+    sprintf(ent->name,"%s","laser");
+  ent->type = type;
+  ent->health = 10;
+  vec3d_cpy(ent->acceleration, acceleration);
+  ent->objModel = obj_load("models/cube.obj");
+  ent->texture = LoadSprite("models/monkey.png",1024,1024);
+  vec3d_cpy(ent->body.position, position);
+  vec3d_cpy(ent->rotation, rotation);
+  cube_set(ent->body.bounds, -1,-1,-1,2,2,2);
+  vec3d_cpy(ent->rotation, rotation);
+  ent->think = laserThink;
+  vec3d_cpy(ent->body.velocity, acceleration);
+  ent->state = 0;
+  mgl_callback_set(&ent->body.touch, touch_callback,ent);
+  return ent;
+}
+
 Entity *newAsteroid(Vec3D position, Vec3D rotation, Vec3D acceleration){
  Entity *ent;
  
@@ -234,6 +372,7 @@ Entity *newAsteroid(Vec3D position, Vec3D rotation, Vec3D acceleration){
  {
    return NULL;
  }
+    ent->type = 2;
     ent->health = 20.00;
     vec3d_cpy(ent->acceleration, acceleration);
     ent->objModel = obj_load("models/cube.obj");
@@ -247,6 +386,7 @@ Entity *newAsteroid(Vec3D position, Vec3D rotation, Vec3D acceleration){
     ent->think = asteroidThink;
     ent->state = 0;
     vec3d_cpy(ent->body.velocity, acceleration);
+    mgl_callback_set(&ent->body.touch, touch_callback,ent);
     return ent;
 }
   
@@ -256,13 +396,14 @@ int main(int argc, char *argv[])
     int i;
     float r = 0;
     Space *space;
-    Entity *cube1,*cube2, *player, *asteroid, *movingAsteroid;
+    Entity *cube1,*cube2, *player, *asteroid, *movingAsteroid, *enemy, *laser;
     char bGameLoopRunning = 1;
     
     Vec3D camTarget = {0,0,0};
     int testing = 0;
     Vec3D cameraPosition = {0,-10,0};
     Vec3D cameraRotation = {90,0,0};
+    Vec3D temporary = {0.0,0.0,0.0};
     float  directionModifier = 1.0;
     SDL_Event e;
     Obj *bgobj,*chicken;
@@ -328,24 +469,33 @@ int main(int argc, char *argv[])
 		  else 
 		    testing = 0;
 		}
-		else if (testing == 1){
+		if (testing == 1){
 		 if (e.key.keysym.sym == SDLK_r){
 		  //spawn asteroid; 
 		   asteroid = newAsteroid(vec3d(camTarget.x, camTarget.y + 20, camTarget.z), vec3d(0,0,0), vec3d(0,0,0));
+		   space_add_body(space,&asteroid->body);
 		 }
 		 if (e.key.keysym.sym == SDLK_f){
 		  //spawn moving asteroid; 
 		   movingAsteroid = newAsteroid(vec3d(camTarget.x, camTarget.y + 20, camTarget.z), vec3d(0,20,0), vec3d(0,2,0));
+		   space_add_body(space,&movingAsteroid->body);
 		 }
 		 if (e.key.keysym.sym == SDLK_v){
 		  //spawn enemy;
+		   enemy = newEnemy(vec3d(camTarget.x, camTarget.y + 20, camTarget.z), vec3d(0,20,0));
+		   space_add_body(space,&enemy->body);
 		   
 		 }
 		}
-                else if (e.key.keysym.sym == SDLK_SPACE)
-                {
-                    cameraPosition.z++;
-		    //playerPosition to match cameraPosition
+                if (e.key.keysym.sym == SDLK_SPACE)
+                {temporary =  vec3d(
+                            -sin(cameraRotation.z * DEGTORAD) *2,
+                            cos(cameraRotation.z * DEGTORAD) * 2,
+                            -cos(cameraRotation.x * DEGTORAD) * 2
+                        );
+                   laser = newLaser(camTarget, cameraRotation, temporary, player->type); 
+		   
+		   space_add_body(space,&laser->body);
                 }
                 else if (e.key.keysym.sym == SDLK_z)
                 {
@@ -453,16 +603,19 @@ int main(int argc, char *argv[])
                 {
 		    vec3d_cpy(cameraPosition, player->body.position);
                     cameraRotation.z += 1;
+		    player->rotation.y += 1;
 		    vec3d_add(cameraPosition,
 			      cameraPosition,
 			      vec3d(
-				((sin((cameraRotation.z) *DEGTORAD) * sin((cameraRotation.x) * DEGTORAD)) * 10),
-				(-(cos((cameraRotation.z) *DEGTORAD) * sin((cameraRotation.x) * DEGTORAD)) * 10),
-				(cos(cameraRotation.x * DEGTORAD) * 10)
+				((sin((cameraRotation.z) *DEGTORAD) * sin((cameraRotation.x) * DEGTORAD)) * 15),
+				(-(cos((cameraRotation.z) *DEGTORAD) * sin((cameraRotation.x) * DEGTORAD)) * 15),
+				(cos(cameraRotation.x * DEGTORAD) * 15)
 			     ));
+		    
+		   
 		    /*not what I need, rotates around the z axis at 0 only*
-		     vec3d((-sin((cameraRotation.z + 180) * DEGTORAD) * 10),
-				    (cos((cameraRotation.z + 180)* DEGTORAD) * 10),
+		     vec3d((-sin((cameraRotation.z + 180) * DEGTORAD) * 15),
+				    (cos((cameraRotation.z + 180)* DEGTORAD) * 15),
 				    cameraPosition.z)
 				    */
 		    //playerRotation to match cameraRotation
@@ -472,12 +625,13 @@ int main(int argc, char *argv[])
 		    
 		    vec3d_cpy(cameraPosition, player->body.position);
                     cameraRotation.z -= 1;
+		    player->rotation.y -= 1;
 		    vec3d_add(cameraPosition,
 			      cameraPosition,
 			      vec3d(
-				((sin((cameraRotation.z) *DEGTORAD) * sin((cameraRotation.x) * DEGTORAD)) * 10),
-				(-(cos((cameraRotation.z) *DEGTORAD) * sin((cameraRotation.x) * DEGTORAD)) * 10),
-				(cos(cameraRotation.x * DEGTORAD) * 10)
+				((sin((cameraRotation.z) *DEGTORAD) * sin((cameraRotation.x) * DEGTORAD)) *15),
+				(-(cos((cameraRotation.z) *DEGTORAD) * sin((cameraRotation.x) * DEGTORAD)) * 15),
+				(cos(cameraRotation.x * DEGTORAD) * 15)
 			     ));
 		      
 		    //playerRotation to match cameraRotation
@@ -486,12 +640,13 @@ int main(int argc, char *argv[])
                 {
 		  vec3d_cpy(cameraPosition, player->body.position);
                     cameraRotation.x += 1;
+		    player->rotation.x += 1;
 		    vec3d_add(cameraPosition,
 			      cameraPosition,
 			      vec3d(
-				((sin((cameraRotation.z) *DEGTORAD) * sin((cameraRotation.x) * DEGTORAD)) * 10),
-				(-(cos((cameraRotation.z) *DEGTORAD) * sin((cameraRotation.x) * DEGTORAD)) * 10),
-				(cos(cameraRotation.x * DEGTORAD) * 10)
+				((sin((cameraRotation.z) *DEGTORAD) * sin((cameraRotation.x) * DEGTORAD)) * 15),
+				(-(cos((cameraRotation.z) *DEGTORAD) * sin((cameraRotation.x) * DEGTORAD)) * 15),
+				(cos(cameraRotation.x * DEGTORAD) * 15)
 			      ));
 		    //playerRotation to match cameraRotation
                 }
@@ -499,12 +654,13 @@ int main(int argc, char *argv[])
                 {
                     vec3d_cpy(cameraPosition, player->body.position);
                     cameraRotation.x -= 1;
+		    player->rotation.x -= 1;
 		    vec3d_add(cameraPosition,
 			      cameraPosition,
 			       vec3d(
-				((sin((cameraRotation.z) *DEGTORAD) * sin((cameraRotation.x) * DEGTORAD)) * 10),
-				(-(cos((cameraRotation.z) *DEGTORAD) * sin((cameraRotation.x) * DEGTORAD)) * 10),
-				(cos(cameraRotation.x * DEGTORAD) * 10)
+				((sin((cameraRotation.z) *DEGTORAD) * sin((cameraRotation.x) * DEGTORAD)) * 15),
+				(-(cos((cameraRotation.z) *DEGTORAD) * sin((cameraRotation.x) * DEGTORAD)) * 15),
+				(cos(cameraRotation.x * DEGTORAD) * 15)
 			     ));
 		    //playerRotation to match cameraRotation
                 }
@@ -523,7 +679,7 @@ int main(int argc, char *argv[])
             cameraPosition,
             cameraRotation);
 	
-        
+        glPushMatrix();
         entity_draw_all();
         glPushMatrix();
         glTranslatef(-5,0,0);
@@ -562,7 +718,7 @@ int main(int argc, char *argv[])
         
         glPopMatrix();
         glPopMatrix();
-        
+        glPopMatrix();
         glPopMatrix();
         obj_draw(
             bgobj,
