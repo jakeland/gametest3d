@@ -94,6 +94,7 @@ void obj_draw(
     Obj *obj,
     Vec3D position,
     Vec3D rotation,
+    Vec3D rotationVector,
     Vec3D scale,
     Vec4D color,
     Sprite *texture

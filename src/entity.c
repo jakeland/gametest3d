@@ -101,6 +101,7 @@ void entity_draw(Entity *ent)
         ent->objModel,
         ent->body.position,
         ent->rotation,
+	ent->rotationVector,
         ent->scale,
         ent->color,
         ent->texture

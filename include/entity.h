@@ -27,12 +27,17 @@ typedef struct Entity_S
     float currDamageDelay;
     float specialDelay;
     float currSpecialDelay;
+    Vec4D totalQuat;
+    Vec3D rotationVector;
     Obj *objModel;
     Obj *objAnimation[24];
     int state;
     float frame;
     Sprite *texture;    /**<object texture*/
     Body body;
+    float cameraDistance;
+    float rotationMod;
+    float speedMod;
     void (*think)(struct Entity_S *self);
 }Entity;
 

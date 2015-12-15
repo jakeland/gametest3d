@@ -95,6 +95,7 @@ void hit_callback(void *data, void *context)
 
 void think(Entity *self)
 {
+  
     if (!self)return;
     switch(self->state)
     {
@@ -112,6 +113,7 @@ void think(Entity *self)
     }
     self->objModel = self->objAnimation[(int)self->frame];
 }
+
 
 void asteroidThink(Entity *self){
  if(!self) return;
@@ -191,8 +193,10 @@ void laserThink(Entity *self){
 
 void playerThink(Entity *self)
 {
+  const Uint8 *keyState = SDL_GetKeyboardState(NULL);
   if(!self)return;
   
+
   
   //press Space
   //Spawn Lazers
@@ -207,6 +211,7 @@ void playerThink(Entity *self)
   //DO A BARREL ROLL!!!!!
   
   
+
   /*
   switch(self->state)
   {
@@ -242,10 +247,29 @@ Vec3D getTargetVector(Vec3D tempPosition, Vec3D tempTarget)
   Vec3D temp = {0,0,0};
   vec3d_add(temp, tempPosition, vec3d(-tempTarget.x, -tempTarget.y, -tempTarget.z));
   
-  normalizeVector(temp);
+  
   return (temp);
 }
 
+
+
+Vec4D normalizedQuaternion(Vec4D temp){
+  float magnitude = sqrt((temp.w * temp.w) +(temp.x*temp.x) + (temp.y*temp.y) + (temp.z*temp.z));
+  Vec4D normQuat = {temp.w/magnitude,temp.x/magnitude, temp.y/magnitude, temp.z/magnitude};
+  
+}
+
+Vec4D multiplyQuat(float angle, Vec3D position, Vec3D target, Vec4D local_rotation){
+  
+  
+  
+  
+}
+ 
+Vec4D rotateQuat(Vec4D temp){
+  
+  
+}
 
 
 Vec3D getCrossProduct(Vec3D temp1, Vec3D temp2){
@@ -310,7 +334,11 @@ Entity *newSpaceShip(Vec3D position,Vec3D rotation, const char *name){
   vec3d_cpy(ent->rotation, rotation);
   sprintf(ent->name, "%s", name);
   ent->think = playerThink;
+  ent->rotationMod = 1.0;
+  ent->speedMod = 1.0;
+  ent->cameraDistance = 10.0;
   ent->state = 0;
+  ent->totalQuat = vec4d(0,0,0,1);
   mgl_callback_set(&ent->body.touch, touch_callback,ent);
   return ent;
 }
@@ -403,8 +431,10 @@ int main(int argc, char *argv[])
     int testing = 0;
     Vec3D cameraPosition = {0,-10,0};
     Vec3D cameraRotation = {90,0,0};
+
     Vec3D temporary = {0.0,0.0,0.0};
     float  directionModifier = 1.0;
+
     SDL_Event e;
     Obj *bgobj,*chicken;
     Sprite *bgtext;
@@ -432,7 +462,6 @@ int main(int argc, char *argv[])
    
     
     
-    
     space = space_new();
     space_set_steps(space,100);
     
@@ -443,6 +472,8 @@ int main(int argc, char *argv[])
     {
        
         entity_think_all();
+	
+	    
         for (i = 0; i < 100;i++)
         {
             space_do_step(space);
@@ -463,6 +494,7 @@ int main(int argc, char *argv[])
                 {
                     bGameLoopRunning = 0;
                 }
+
                 else if (e.key.keysym.sym == SDLK_t){
 		  if (testing == 0)
 		    testing = 1;
@@ -496,13 +528,14 @@ int main(int argc, char *argv[])
                    laser = newLaser(camTarget, cameraRotation, temporary, player->type); 
 		   
 		   space_add_body(space,&laser->body);
+
                 }
-                else if (e.key.keysym.sym == SDLK_z)
+                if (e.key.keysym.sym == SDLK_z)
                 {
                     cameraPosition.z--;
 		    //playerPosition to match cameraPosition
                 }
-                else if (e.key.keysym.sym == SDLK_w)
+                if (e.key.keysym.sym == SDLK_w)
                 {
                     vec3d_add(
                         cameraPosition,
@@ -525,7 +558,7 @@ int main(int argc, char *argv[])
 		      player->body.position,
 		      camTarget);
                 }
-                else if (e.key.keysym.sym == SDLK_s)
+                if (e.key.keysym.sym == SDLK_s)
                 {
                      vec3d_add(
 		       cameraPosition,
@@ -548,7 +581,7 @@ int main(int argc, char *argv[])
 		      player->body.position,
 		      camTarget);
                 }
-                else if (e.key.keysym.sym == SDLK_d)
+                if (e.key.keysym.sym == SDLK_d)
                 {
 		   
                     vec3d_add(
@@ -574,7 +607,7 @@ int main(int argc, char *argv[])
 		    
 		    //playerPosition to match cameraPosition
                 }
-                else if (e.key.keysym.sym == SDLK_a)
+                if (e.key.keysym.sym == SDLK_a)
                 {
                     vec3d_add(
                         cameraPosition,
@@ -599,20 +632,28 @@ int main(int argc, char *argv[])
 		    //playerPosition to match cameraPosition
 		    
                 }
-                else if (e.key.keysym.sym == SDLK_LEFT)
+                if (e.key.keysym.sym == SDLK_LEFT)
                 {
 		    vec3d_cpy(cameraPosition, player->body.position);
                     cameraRotation.z += 1;
-		    player->rotation.y += 1;
+		    temporary = vec3d(0.0,0.0,0.0);
+		    //player->rotation.y += 1;
+		    vec3d_add(temporary,player->body.position,vec3d(player->body.position.x, 
+								 player->body.position.y + 10, 
+								 player->body.position.z));
+		    Vec4D newRotation = multiplyQuat(player->rotation.y+1,player->body.position,temporary,player->totalQuat);
+		    printf("Here is the total Quat: %f", player->totalQuat);
 		    vec3d_add(cameraPosition,
 			      cameraPosition,
 			      vec3d(
+    
 				((sin((cameraRotation.z) *DEGTORAD) * sin((cameraRotation.x) * DEGTORAD)) * 15),
 				(-(cos((cameraRotation.z) *DEGTORAD) * sin((cameraRotation.x) * DEGTORAD)) * 15),
 				(cos(cameraRotation.x * DEGTORAD) * 15)
 			     ));
 		    
 		   
+
 		    /*not what I need, rotates around the z axis at 0 only*
 		     vec3d((-sin((cameraRotation.z + 180) * DEGTORAD) * 15),
 				    (cos((cameraRotation.z + 180)* DEGTORAD) * 15),
@@ -620,7 +661,7 @@ int main(int argc, char *argv[])
 				    */
 		    //playerRotation to match cameraRotation
                 }
-                else if (e.key.keysym.sym == SDLK_RIGHT)
+                if (e.key.keysym.sym == SDLK_RIGHT)
                 {
 		    
 		    vec3d_cpy(cameraPosition, player->body.position);
@@ -629,14 +670,16 @@ int main(int argc, char *argv[])
 		    vec3d_add(cameraPosition,
 			      cameraPosition,
 			      vec3d(
+
 				((sin((cameraRotation.z) *DEGTORAD) * sin((cameraRotation.x) * DEGTORAD)) *15),
 				(-(cos((cameraRotation.z) *DEGTORAD) * sin((cameraRotation.x) * DEGTORAD)) * 15),
 				(cos(cameraRotation.x * DEGTORAD) * 15)
+
 			     ));
 		      
 		    //playerRotation to match cameraRotation
                 }
-                else if (e.key.keysym.sym == SDLK_UP)
+                if (e.key.keysym.sym == SDLK_UP)
                 {
 		  vec3d_cpy(cameraPosition, player->body.position);
                     cameraRotation.x += 1;
@@ -650,7 +693,7 @@ int main(int argc, char *argv[])
 			      ));
 		    //playerRotation to match cameraRotation
                 }
-                else if (e.key.keysym.sym == SDLK_DOWN)
+                if (e.key.keysym.sym == SDLK_DOWN)
                 {
                     vec3d_cpy(cameraPosition, player->body.position);
                     cameraRotation.x -= 1;
@@ -658,20 +701,22 @@ int main(int argc, char *argv[])
 		    vec3d_add(cameraPosition,
 			      cameraPosition,
 			       vec3d(
+
 				((sin((cameraRotation.z) *DEGTORAD) * sin((cameraRotation.x) * DEGTORAD)) * 15),
 				(-(cos((cameraRotation.z) *DEGTORAD) * sin((cameraRotation.x) * DEGTORAD)) * 15),
 				(cos(cameraRotation.x * DEGTORAD) * 15)
+
 			     ));
 		    //playerRotation to match cameraRotation
                 }
-                else if (e.key.keysym.sym == SDLK_n)
+                if (e.key.keysym.sym == SDLK_n)
                 {
                     cube1->state ++;
                     if (cube1->state >= 3)cube1->state = 0;
                 }
             }
         }
-
+	
         graphics3d_frame_begin();
         
         glPushMatrix();
@@ -687,6 +732,7 @@ int main(int argc, char *argv[])
             chicken,
             vec3d(0,0,0),
             vec3d(0,0,0),
+	    vec3d(0,0,1),
             vec3d(1,1,1),
             vec4d(1,0,0,1),
             NULL
@@ -701,6 +747,7 @@ int main(int argc, char *argv[])
             chicken,
             vec3d(0,0,0),
             vec3d(0,0,0),
+	    vec3d(0,0,1),
             vec3d(1,1,1),
             vec4d(0,1,0,1),
             NULL
@@ -711,6 +758,7 @@ int main(int argc, char *argv[])
             chicken,
             vec3d(0,0,0),
             vec3d(0,0,0),
+	    vec3d(0,0,1),
             vec3d(0.5,0.5,0.5),
             vec4d(0,0,1,1),
             NULL
@@ -724,6 +772,7 @@ int main(int argc, char *argv[])
             bgobj,
             vec3d(0,0,2),
             vec3d(90,90,0),
+	    vec3d(0,0,1),
             vec3d(5,5,5),
             vec4d(1,1,1,1),
             bgtext
